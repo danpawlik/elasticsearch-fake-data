@@ -8,6 +8,7 @@ import datetime
 import elasticsearch
 import json
 import random
+import string
 import uuid
 
 json_sample = '''{
@@ -18,15 +19,15 @@ json_sample = '''{
     "build_short_uuid": "RANDOM_STRING",
     "timestamp": "2021-05-25 09:47:21.797",
     "build_status": "RANDOM_CHOICE",
-    "tags": ["job-output.txt", "console", "console.html"],
+    "tags": ["RANDOM_STRING", "RANDOM_STRING", "RANDOM_STRING"],
     "project": "RANDOM_STRING",
     "build_queue": "check",
     "port": "RANDOM_NUMBER",
-    "log_url": "https://RANDOM_STRING/logs/62/RANDOM_NUMBER/2/check/sf-tenants/RANDOM_STRING/job-output.txt",
+    "log_url": "https://RANDOM_STRING/logs/RANDOM_NUMBER/RANDOM_NUMBER/RANDOM_NUMBER/check/RANDOM_STRING/RANDOM_STRING/job-output.txt",
     "build_branch": "master",
     "sep": "|",
-    "filename": "job-output.txt",
-    "build_ref": "refs/changes/62/RANDOM_NUMBER/2",
+    "filename": "RANDOM_STRING",
+    "build_ref": "refs/changes/RANDOM_NUMBER/RANDOM_NUMBER/RANDOM_NUMBER",
     "build_node": "cloud-centos-7",
     "build_uuid": "RANDOM_STRING",
     "host": "RANDOM_STRING",
@@ -62,21 +63,28 @@ def get_arguments():
 
 
 def get_rand_date():
-    return datetime.date(random.randint(2005, 2145), random.randint(1, 12),
-                         random.randint(1, 28)
-                         ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    return datetime.datetime(random.randint(2005, 2145),
+                             random.randint(1, 12),
+                             random.randint(1, 28),
+                             random.randint(0, 23),
+                             random.randint(0, 59),
+                             random.randint(0, 59),
+                             random.randint(0, 999999)
+                             ).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 def gen_rand_str(text):
     new_txt = ''
     if 'RANDOM_STRING' in text:
-        new_txt = text.replace('RANDOM_STRING', uuid.uuid4().hex.upper())
+        char_set = string.ascii_lowercase + string.digits
+        new_txt = text.replace('RANDOM_STRING',
+                               ''.join(random.sample(char_set*6, 24)))
     elif 'RANDOM_TEXT' in text:
+        char_set = string.ascii_lowercase + string.digits
         new_txt = text.replace('RANDOM_TEXT', ("%s %s %s" % (
-            uuid.uuid4().hex.upper(),
-            uuid.uuid4().hex.upper(),
-            uuid.uuid4().hex.upper()))
-        )
+                               ''.join(random.sample(char_set*6, 24)),
+                               ''.join(random.sample(char_set*6, 24)),
+                               ''.join(random.sample(char_set*6, 24)))))
     elif 'RANDOM_CHOICE' in text:
         new_txt = text.replace('RANDOM_CHOICE', random.choice(
             ['SUCCESS', 'FAILURE', 'ERROR'])
